@@ -43,11 +43,11 @@ The CSV Mini Database is built using a modular architecture consisting of four p
   - Iterate through the matching row indices, project only the `select_columns`, and format the output.
 
 ## 3. Data Flow
-1. User inputs: `SELECT name, age FROM users.csv WHERE city = Tokyo;`
+1. User inputs: `SELECT Id, Species FROM data/Iris Data.csv WHERE Species = Iris-setosa;`
 2. **CLI** captures the string and sends it to the **Lexer**.
-3. **Lexer** returns a `Query` object: `{select: ["name", "age"], from: "users.csv", where_col: "city", where_val: "Tokyo"}`.
+3. **Lexer** returns a `Query` object: `{select: ["Id", "Species"], from: "data/Iris Data.csv", where_col: "Species", where_val: "Iris-setosa"}`.
 4. **CLI** passes the `Query` object to the **Executor**.
-5. **Executor** checks if `users.csv` is loaded. If not, the **Indexer** reads the file and builds a `std::unordered_map` for the `city` column.
-6. **Executor** queries the map: `index["Tokyo"]`, getting row IDs (e.g., `[2, 5, 8]`).
-7. **Executor** fetches rows `2, 5, 8`, extracts the `name` and `age` fields, and returns the result to the **CLI**.
+5. **Executor** checks if `data/Iris Data.csv` is loaded. If not, the **Indexer** reads the file and builds a `std::unordered_map` for the `Species` column.
+6. **Executor** queries the map: `index["Iris-setosa"]`, getting row IDs (e.g., `[0, 1, 2, ...]`).
+7. **Executor** fetches rows `0, 1, 2`, extracts the `Id` and `Species` fields, and returns the result to the **CLI**.
 8. **CLI** prints the tabular result to the screen.
