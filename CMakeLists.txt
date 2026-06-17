@@ -14,7 +14,27 @@ add_executable(csv_db
     src/Executor.cpp
 )
 
-# Optional: Testing
-# enable_testing()
-# add_executable(test_csv tests/test_csv.cpp src/Lexer.cpp src/CSVParser.cpp src/Indexer.cpp src/Executor.cpp)
-# add_test(NAME test_csv COMMAND test_csv)
+# Testing Configuration
+enable_testing()
+
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+add_executable(test_csv
+    tests/test_csv.cpp
+    src/Lexer.cpp
+    src/CSVParser.cpp
+    src/Indexer.cpp
+    src/Executor.cpp
+)
+
+target_link_libraries(test_csv gtest_main)
+
+include(GoogleTest)
+gtest_discover_tests(test_csv)

@@ -1,13 +1,13 @@
 # 06 Traceability Matrix
 
-This document maps the requirements defined in the Software Requirements Specification (SRS) to the specific source code files and functions that implement them.
+This document maps the requirements defined in the Software Requirements Specification (SRS) to the specific source code components and the automated test cases that verify them. This ensures that every requirement is implemented and proven to work.
 
-| Requirement ID | Description | Implemented In (File) | Function / Component |
+| Requirement ID | Description | Implemented In (File) | Test Case ID / Name |
 |---|---|---|---|
-| **FR1** | CSV Ingestion (read and parse CSV files) | `src/CSVParser.cpp` | `CSVParser::parse`, `split_csv_line` |
-| **FR2** | Index Generation (build hash index) | `src/Indexer.cpp` | `Indexer::build_index`, `Indexer::lookup` |
-| **FR3** | Query Parsing (`SELECT` statement) | `src/Lexer.cpp` | `Lexer::parse` |
-| **FR4** | Query Execution (execute query, return rows) | `src/Executor.cpp` | `Executor::execute`, `Executor::load_table_if_needed` |
-| **FR5** | Error Handling: File not found | `src/CSVParser.cpp` | `CSVParser::parse` (Throws `std::runtime_error`) |
-| **FR5** | Error Handling: Syntax error | `src/Lexer.cpp` | `Lexer::parse` (Throws `std::invalid_argument`) |
-| **FR5** | Error Handling: Unknown column | `src/Executor.cpp` <br> `src/Indexer.cpp` | `Executor::execute`, `Indexer::build_index` |
+| **FR1** | CSV Ingestion (read and parse CSV files) | `src/CSVParser.cpp` | `IndexerTest.BuildIndex` (tests parsing during indexing) |
+| **FR2** | Index Generation (build hash index) | `src/Indexer.cpp` | `IndexerTest.BuildIndex` |
+| **FR3** | Query Parsing (`SELECT` statement) | `src/Lexer.cpp` | `LexerTest.ValidQuery`, `LexerTest.SelectAll`, `LexerTest.MissingFrom` |
+| **FR4** | Query Execution (execute query, return rows) | `src/Executor.cpp` | `ExecutorTest.EmptyResult`, TC1, TC2 |
+| **FR5** | Error Handling: File not found | `src/CSVParser.cpp` | `ExecutorTest.FileNotFound`, TC6 |
+| **FR5** | Error Handling: Syntax error | `src/Lexer.cpp` | `LexerTest.MissingFrom`, TC4 |
+| **FR5** | Error Handling: Unknown column | `src/Executor.cpp` | `ExecutorTest.UnknownColumn`, TC5 |
