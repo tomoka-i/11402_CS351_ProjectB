@@ -1,7 +1,5 @@
 # Project B — CSV Mini Database & Query Engine
 
-[![C++ CI with CMake](https://github.com/tomoka-i/11402_CS351_ProjectB/actions/workflows/ci.yml/badge.svg)](https://github.com/tomoka-i/11402_CS351_ProjectB/actions/workflows/ci.yml)
-
 ## Overview
 
 A compact, teachable CSV mini-database and query engine implemented in C++. It ingests CSV files, builds lightweight hash indexes, and executes a simple `SELECT` query grammar for fast lookups and projections.
