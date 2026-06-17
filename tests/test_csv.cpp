@@ -5,6 +5,21 @@
 #include "Executor.hpp"
 #include <fstream>
 #include <stdexcept>
+#include <sstream>
+
+// Helper to resolve test file paths regardless of the working directory
+std::string get_test_file_path(const std::string& filename) {
+    // Try current directory
+    std::ifstream f1(filename);
+    if (f1.good()) return filename;
+
+    // Try relative to build dir
+    std::string rel_path = "../" + filename;
+    std::ifstream f2(rel_path);
+    if (f2.good()) return rel_path;
+    
+    return filename; // fallback
+}
 
 // Test Lexer
 TEST(LexerTest, ValidQuery) {
@@ -34,7 +49,8 @@ TEST(LexerTest, MissingFrom) {
 
 // Test CSVParser & Indexer
 TEST(IndexerTest, BuildIndex) {
-    CSVTable table = CSVParser::parse("tests/data/test.csv");
+    std::string path = get_test_file_path("tests/data/test.csv");
+    CSVTable table = CSVParser::parse(path);
     EXPECT_EQ(table.headers.size(), 3);
     
     Indexer indexer(table);
@@ -46,16 +62,17 @@ TEST(IndexerTest, BuildIndex) {
 
 // Test Executor Edge Cases
 TEST(ExecutorTest, UnknownColumn) {
-    std::string q_str = "SELECT Unknown FROM tests/data/test.csv WHERE Age = 30";
+    std::string path = get_test_file_path("tests/data/test.csv");
+    std::string q_str = "SELECT Unknown FROM " + path + " WHERE Age = 30";
     Query q = Lexer::parse(q_str);
     
     Executor executor;
-    testing::internal::CaptureStdout();
-    executor.execute(q);
-    std::string output = testing::internal::GetCapturedStdout();
-    // Executor outputs to std::cerr or out for errors. We capture stdout here. 
-    // Usually, exceptions are better for unknown columns, but we'll check if output is empty or has an error.
-    EXPECT_NE(output.find("Unknown"), std::string::npos);
+    std::stringstream ss;
+    executor.execute(q, ss);
+    std::string output = ss.str();
+    
+    // Executor writes error string directly to stream for unknown column
+    EXPECT_NE(output.find("Error: Unknown Column"), std::string::npos);
 }
 
 TEST(ExecutorTest, FileNotFound) {
@@ -63,20 +80,25 @@ TEST(ExecutorTest, FileNotFound) {
     Query q = Lexer::parse(q_str);
     
     Executor executor;
-    // CSVParser throws runtime_error on file not found based on traceability matrix
-    EXPECT_THROW(executor.execute(q), std::runtime_error);
+    std::stringstream ss;
+    executor.execute(q, ss);
+    std::string output = ss.str();
+
+    // Executor catches the CSVParser std::runtime_error and writes it to stream
+    EXPECT_NE(output.find("Error loading table: File Not Found: missing.csv"), std::string::npos);
 }
 
 TEST(ExecutorTest, EmptyResult) {
-    std::string q_str = "SELECT Id FROM tests/data/test.csv WHERE Age = 100";
+    std::string path = get_test_file_path("tests/data/test.csv");
+    std::string q_str = "SELECT Id FROM " + path + " WHERE Age = 100";
     Query q = Lexer::parse(q_str);
     
     Executor executor;
-    testing::internal::CaptureStdout();
-    executor.execute(q);
-    std::string output = testing::internal::GetCapturedStdout();
-    // It might output (0 rows returned) or No matching records found. 
-    // We'll just ensure it runs without crashing.
+    std::stringstream ss;
+    executor.execute(q, ss);
+    std::string output = ss.str();
+    // Headers are still printed, but no rows. As long as it doesn't crash, it's fine.
+    EXPECT_NE(output.find("Id"), std::string::npos); 
 }
 
 int main(int argc, char **argv) {
